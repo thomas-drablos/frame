@@ -58,6 +58,14 @@ impl Frame {
         self
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn len(&self) -> usize {
+        self.data[0].len()
+    }
+
     pub fn map_parse(
         &mut self,
         name: impl AsRef<str>,
