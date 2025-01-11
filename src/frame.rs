@@ -95,18 +95,33 @@ impl fmt::Display for Frame {
         }
         writeln!(tw).unwrap();
 
-        for i in 0..std::cmp::min(10, self.data[0].len()) {
-            let mut series = self.data.iter();
-            match series.next().unwrap().data() {
-                SeriesData::F64(fs) => write!(tw, "{}", fs[i]).unwrap(),
-                SeriesData::Str(ss) => write!(tw, "{}", ss[i]).unwrap(),
-            }
+        let mut write_kind = |s: &Series, include_tab: bool| {
+            if include_tab { write!(tw, "\t").unwrap(); }
+            write!(tw, "{}", match s.data() {
+                SeriesData::F64(..) => "f64",
+                SeriesData::Str(..) => "string",
+            }).unwrap();
+        };
 
-            for s in series {
+        let mut series = self.data.iter();
+        write_kind(series.next().unwrap(), false);
+        for s in series {
+            write_kind(s, true);
+        }
+        writeln!(tw).unwrap();
+
+        for i in 0..std::cmp::min(10, self.data[0].len()) {
+            let mut write_element = |s: &Series, include_tab: bool| {
+                if include_tab { write!(tw, "\t").unwrap(); }
                 match s.data() {
-                    SeriesData::F64(fs) => write!(tw, "\t{}", fs[i]).unwrap(),
-                    SeriesData::Str(ss) => write!(tw, "\t{}", ss[i]).unwrap(),
+                    SeriesData::F64(fs) => write!(tw, "{}", fs[i]).unwrap(),
+                    SeriesData::Str(ss) => write!(tw, "{}", ss[i]).unwrap(),
                 }
+            };
+            let mut series = self.data.iter();
+            write_element(series.next().unwrap(), false);
+            for s in series {
+                write_element(s, true);
             }
             writeln!(tw).unwrap();
         }
