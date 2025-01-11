@@ -1,14 +1,9 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub use error::Error;
+pub use frame::Frame;
+pub use series::{Series, SeriesData};
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub type Result<T> = std::result::Result<T, Error>;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+mod error;
+mod frame;
+mod series;
