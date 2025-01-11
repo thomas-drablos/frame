@@ -96,11 +96,18 @@ impl fmt::Display for Frame {
         writeln!(tw).unwrap();
 
         let mut write_kind = |s: &Series, include_tab: bool| {
-            if include_tab { write!(tw, "\t").unwrap(); }
-            write!(tw, "{}", match s.data() {
-                SeriesData::F64(..) => "f64",
-                SeriesData::Str(..) => "string",
-            }).unwrap();
+            if include_tab {
+                write!(tw, "\t").unwrap();
+            }
+            write!(
+                tw,
+                "{}",
+                match s.data() {
+                    SeriesData::F64(..) => "f64",
+                    SeriesData::Str(..) => "string",
+                }
+            )
+            .unwrap();
         };
 
         let mut series = self.data.iter();
@@ -112,7 +119,9 @@ impl fmt::Display for Frame {
 
         for i in 0..std::cmp::min(10, self.data[0].len()) {
             let mut write_element = |s: &Series, include_tab: bool| {
-                if include_tab { write!(tw, "\t").unwrap(); }
+                if include_tab {
+                    write!(tw, "\t").unwrap();
+                }
                 match s.data() {
                     SeriesData::F64(fs) => write!(tw, "{}", fs[i]).unwrap(),
                     SeriesData::Str(ss) => write!(tw, "{}", ss[i]).unwrap(),
