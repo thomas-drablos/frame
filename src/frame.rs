@@ -16,34 +16,49 @@ pub struct Frame {
 }
 
 impl Frame {
-    pub fn from_csv(path: impl AsRef<Path>) -> Result<Self> {
-        Self::from_reader(File::open(path)?)
+    pub fn from_csv(path: impl AsRef<Path>, has_headers: bool) -> Result<Self> {
+        Self::from_reader(File::open(path)?, has_headers)
     }
 
-    pub fn from_reader<R: io::Read>(reader: R) -> Result<Self> {
+    pub fn from_reader<R: io::Read>(reader: R, has_headers: bool) -> Result<Self> {
         let records = csv::ReaderBuilder::new()
-            .has_headers(false)
+            .has_headers(has_headers)
             .from_reader(reader)
             .into_records()
             .collect::<csv::Result<Vec<_>>>()?;
-        assert!(records.len() > 1 && !records[0].is_empty());
+
+        if has_headers {
+            assert!(records.len() > 1);
+        } else {
+            assert!(!records.is_empty());
+        }
+        assert!(!records[0].is_empty());
 
         let mut data = (0..records[0].len())
-            .map(|i| Series::new(&records[0][i]))
+            .map(|i| Series::new(if has_headers { "" } else { &records[0][i] }))
             .collect::<Vec<_>>();
 
         for (i, series) in data.iter_mut().enumerate() {
-            if records.iter().skip(1).all(|r| f64::from_str(&r[i]).is_ok()) {
+            if records
+                .iter()
+                .skip(if has_headers { 1 } else { 0 })
+                .all(|r| f64::from_str(&r[i]).is_ok())
+            {
                 series.data = SeriesData::F64(
                     records
                         .iter()
-                        .skip(1)
+                        .skip(if has_headers { 1 } else { 0 })
                         .map(|r| f64::from_str(&r[i]).unwrap())
                         .collect(),
                 );
             } else {
-                series.data =
-                    SeriesData::Str(records.iter().skip(1).map(|r| r[i].into()).collect());
+                series.data = SeriesData::Str(
+                    records
+                        .iter()
+                        .skip(if has_headers { 1 } else { 0 })
+                        .map(|r| r[i].into())
+                        .collect(),
+                );
             }
         }
 
