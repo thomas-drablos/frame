@@ -1,4 +1,5 @@
 use std::{
+    ffi::OsStr,
     fmt,
     fs::File,
     io::{self, Write},
@@ -17,7 +18,18 @@ pub struct Frame {
 
 impl Frame {
     pub fn from_csv(path: impl AsRef<Path>, has_headers: bool) -> Result<Self> {
-        Self::from_reader(File::open(path)?, has_headers)
+        let path = path.as_ref();
+        let f = File::open(path)?;
+
+        if path
+            .extension()
+            .and_then(OsStr::to_str)
+            .is_some_and(|x| x == "gz")
+        {
+            Self::from_reader(flate2::read::GzDecoder::new(f), has_headers)
+        } else {
+            Self::from_reader(f, has_headers)
+        }
     }
 
     pub fn from_reader<R: io::Read>(reader: R, has_headers: bool) -> Result<Self> {
