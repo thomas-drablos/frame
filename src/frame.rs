@@ -47,7 +47,7 @@ impl Frame {
         assert!(!records[0].is_empty());
 
         let mut data = (0..records[0].len())
-            .map(|i| Series::new(if has_headers { "" } else { &records[0][i] }))
+            .map(|i| Series::new(if has_headers { &records[0][i] } else { "" }))
             .collect::<Vec<_>>();
 
         for (i, series) in data.iter_mut().enumerate() {
