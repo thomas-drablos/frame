@@ -109,6 +109,10 @@ impl Frame {
         }
         self
     }
+
+    pub fn num_columns(&self) -> usize {
+        self.data.len()
+    }
 }
 
 impl fmt::Display for Frame {
