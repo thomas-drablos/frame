@@ -34,7 +34,7 @@ impl Frame {
 
     pub fn from_reader<R: io::Read>(reader: R, has_headers: bool) -> Result<Self> {
         let records = csv::ReaderBuilder::new()
-            .has_headers(has_headers)
+            .has_headers(false)
             .from_reader(reader)
             .into_records()
             .collect::<csv::Result<Vec<_>>>()?;
